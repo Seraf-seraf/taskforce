@@ -21,7 +21,7 @@ class AuthController extends Controller
         $model  = new User();
         $cities = City::find()->orderBy('name')->all();
 
-        if (Yii::$app->request->getIsPost()) {
+        if (Yii::$app->request->isPost) {
             $model->load(Yii::$app->request->post());
 
             if (Yii::$app->request->isAjax) {
@@ -31,14 +31,12 @@ class AuthController extends Controller
             }
 
             if ($model->validate()) {
-                $model->password = Yii::$app->security->generatePasswordHash(
-                    $model->password
-                );
+                $model->password = Yii::$app->security->generatePasswordHash($model->password);
                 $model->save(false);
 
                 $userSettings          = new UserSettings();
                 $userSettings->user_id = $model->id;
-                $userSettings->save(false);
+                $userSettings->save();
 
                 if ($model->isPerformer) {
                     $performer = new Performer();
@@ -47,16 +45,17 @@ class AuthController extends Controller
                     $performer->performer_id = $model->id;
                     $rating->performer_id    = $model->id;
 
-                    $performer->save(false);
-                    $rating->save(false);
+                    $performer->save();
+                    $rating->save();
                 }
-                $this->goHome();
+                Yii::$app->user->login(User::findIdentity($model->id));
+
+                return $this->goHome();
             }
         }
 
         return $this->render(
-            'signup',
-            [
+            'signup', [
                 'model'  => $model,
                 'cities' => $cities,
             ]
@@ -69,6 +68,12 @@ class AuthController extends Controller
 
         if (Yii::$app->request->isPost) {
             $loginForm->load(Yii::$app->request->post());
+
+            if (Yii::$app->request->isAjax) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+
+                return ActiveForm::validate($loginForm);
+            }
 
             if ($loginForm->validate()) {
                 Yii::$app->user->login($loginForm->getUser());

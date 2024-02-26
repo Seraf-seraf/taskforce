@@ -9,6 +9,7 @@ use yii\db\Query;
  *
  * @property int $performer_id
  * @property int|null $status_id
+ * @property int|null $task_id
  *
  * @property User $performer
  * @property Rating $rating
@@ -31,10 +32,11 @@ class Performer extends \yii\db\ActiveRecord
     {
         return [
             [['performer_id'], 'required'],
-            [['performer_id', 'status_id'], 'integer'],
+            [['performer_id', 'status_id', 'task_id'], 'integer'],
             [['performer_id'], 'unique'],
             [['performer_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['performer_id' => 'id']],
             [['status_id'], 'exist', 'skipOnError' => true, 'targetClass' => PerformerStatus::class, 'targetAttribute' => ['status_id' => 'id']],
+            [['task_id'], 'exist', 'skipOnError' => true, 'targetClass' => Task::class, 'targetAttribute' => ['task_id' => 'id']],
         ];
     }
 
@@ -46,17 +48,28 @@ class Performer extends \yii\db\ActiveRecord
         return [
             'performer_id' => 'Performer ID',
             'status_id' => 'Status ID',
+            'task_id' => 'Task ID'
         ];
     }
 
     /**
-     * Gets query for [[Performer]].
+     * Gets query for [[User]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getPerformer()
+    public function getUser()
     {
         return $this->hasOne(User::class, ['id' => 'performer_id']);
+    }
+
+    /**
+     * Gets query for [[Task]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTask()
+    {
+        return $this->hasOne(Task::class, ['id' => 'task_id']);
     }
 
     /**
@@ -78,6 +91,17 @@ class Performer extends \yii\db\ActiveRecord
     {
         return $this->hasOne(PerformerStatus::class, ['id' => 'status_id']);
     }
+
+    /**
+     * Gets query for [[Comments]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getComments()
+    {
+        return $this->hasMany(Comments::class, ['performer_id' => 'performer_id']);
+    }
+
 
     public static function getRatingPosition($id)
     {

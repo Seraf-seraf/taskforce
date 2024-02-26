@@ -33,7 +33,7 @@ class LandingController extends Controller
 
     public function actionIndex()
     {
-        $this->layout = '//landing';
+        $this->layout = '/landing';
 
         return $this->render('login', ['model' => new LoginForm()]);
     }

@@ -73,7 +73,7 @@ class Comments extends \yii\db\ActiveRecord
      */
     public function getPerformer()
     {
-        return $this->hasOne(User::class, ['id' => 'performer_id']);
+        return $this->hasOne(Performer::class, ['performer_id' => 'performer_id']);
     }
 
     /**

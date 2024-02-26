@@ -1,25 +1,29 @@
 <?php
 namespace TaskForce\logic\actions;
 
-abstract class AbstractAction 
+interface AbstractAction
 {
     /**
      * Возвращает лейбл для действия
      * @return string
      */
-    abstract public static function getLabel(): string;
+    public static function getLabel(): string;
 
 
     /**
      * Возвращает имя действия
      * @return string  
      */
-    abstract public static function getActionName(): string;
-
+    public static function getActionName(): string;
 
     /**
      * Проверяет право на выполнение действия
+     *
+     * @param  int  $userID ID пользователя, который залогинен на странице
+     * @param  int  $clientID ID заказчика
+     * @param  int|null  $performerID ID исполнителя
+     *
      * @return bool
      */
-    abstract public static function checkRights(int $userID, int $cliendID, ?int $performerID): bool;
+    public static function checkRights(int $userID, int $clientID, ?int $performerID): bool;
 }

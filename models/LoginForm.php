@@ -17,8 +17,8 @@ class LoginForm extends Model
     {
         return [
             [['email', 'password'], 'required'],
-            [['email', 'password'], 'safe'],
-            ['password', 'validatePassword'],
+            [['email'], 'email', 'message' => 'Неправильный формат электронной почты'],
+            [['password'], 'validatePassword'],
         ];
     }
 

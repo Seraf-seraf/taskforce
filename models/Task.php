@@ -47,16 +47,17 @@ class Task extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['category_id', 'name', 'description'], 'required'],
+            [['category_id', 'name', 'description', 'deadline'], 'required'],
             [['taskStatus_id', 'category_id', 'budget'], 'integer'],
-            ['client_id', 'default', 'value' => function () {
-                return Yii::$app->user->id;
-            }],
-            ['taskStatus_id', 'default', 'value' => 1],
+            [['client_id'], 'default', 'value' => Yii::$app->user->id],
+            [['taskStatus_id'], 'default', 'value' => 1],
             [['finished', 'dateCreate'], 'safe'],
-            ['deadline', 'date', 'format' => 'php:Y-m-d', 'min' => date('Y-m-d', strtotime('+1 day')), 'minString' => 'чем текущий день'],
+            [['deadline'], 'date', 'format' => 'php:Y-m-d', 'min' => date('Y-m-d', strtotime('+1 day')), 'minString' => 'чем текущий день'],
             [['name'], 'string', 'max' => 64],
-            ['location', 'string', 'max' => 128],
+            [['noLocation'], 'boolean'],
+            [['noResponses'], 'boolean'],
+            [['filterPeriod'], 'integer'],
+            [['location'], 'string', 'max' => 128],
             [['description'], 'string', 'length' => [30, 200], 'tooShort' => 'Описание задания должно быть длиной минимум 30 символов'],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['client_id' => 'id']],
             [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => TaskCategories::class, 'targetAttribute' => ['category_id' => 'id']],
@@ -147,6 +148,11 @@ class Task extends \yii\db\ActiveRecord
         return $this->hasOne(TaskStatus::class, ['id' => 'taskStatus_id']);
     }
 
+    public function getPerformer()
+    {
+        return $this->hasOne(Performer::class, ['task_id' => 'id']);
+    }
+
     public function getSearchQuery(): \yii\db\ActiveQuery
     {
         $query = self::find();
@@ -154,15 +160,16 @@ class Task extends \yii\db\ActiveRecord
         $query->andFilterWhere(['category_id' => $this->category_id]);
 
         if ($this->noLocation) {
-            $query->andWhere(['location' => null]);
+            $query->andWhere(['location' => '']);
         }
 
         if ($this->noResponses) {
-            $query->leftJoin('response', 'response.task_id = task.id')->andWhere(['response.id' => null]);
+            $query->leftJoin('response', 'response.task_id = task.id')
+                  ->andWhere(['response.id' => null]);
         }
 
         if ($this->filterPeriod) {
-            $query->andWhere(['>', 'UNIX_TIMESTAMP(task.dateCreate)', time() - $this->filterPeriod]);
+            $query->andFilterWhere(['>', 'UNIX_TIMESTAMP(task.dateCreate)', time() - $this->filterPeriod]);
         }
 
         return $query->orderBy(['task.dateCreate' => SORT_DESC]);

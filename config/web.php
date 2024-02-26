@@ -5,7 +5,8 @@ $db = require __DIR__ . '/db.php';
 $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
-    'homeUrl'    => ['tasks/index'],
+    'homeUrl'    => '/',
+    'defaultRoute' => '/',
     'language'   => 'ru-RU',
     'timeZone'   => 'Europe/Moscow',
     'bootstrap' => ['log'],
@@ -26,8 +27,12 @@ $config = [
             'enableAutoLogin' => true,
             'loginUrl' => ['landing/index'],
         ],
+        'formatter' => [
+            'class' => 'yii\i18n\Formatter',
+            'sizeFormatBase' => 1024,
+        ],
         'errorHandler' => [
-            'errorAction' => '',
+            'errorAction' => 'error/notfound',
         ],
         'mailer' => [
             'class' => \yii\symfonymailer\Mailer::class,
@@ -56,6 +61,7 @@ $config = [
                 '/' => 'tasks/index',
                 'view/<id:\d+>'   => 'tasks/view',
                 'user/<id:\d+>'   => 'user/view',
+                'error' => 'error/notfound'
             ],
         ],
     ],

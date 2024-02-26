@@ -316,7 +316,8 @@ template {
   display: none; }
 
 .link {
-  text-decoration: none; }
+  text-decoration: none;
+  word-break: break-word; }
 
 .link--nav {
   display: -webkit-box;
@@ -967,8 +968,13 @@ template {
   padding: 0; }
 
 .enumeration-item {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-top: 5px;
   margin-top: 31px;
-  margin-bottom: 25px; }
+  margin-bottom: 25px;
+  padding-bottom: 20px;}
   .enumeration-item a {
     padding-left: 50px;
     position: relative; }
@@ -1096,7 +1102,8 @@ template {
 .task-text {
   font-size: 16px;
   color: #989898;
-  margin-bottom: 14px; }
+  margin-bottom: 14px;
+  word-break: break-word; }
 
 .footer-task {
   display: -webkit-box;

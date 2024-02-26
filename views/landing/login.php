@@ -1,15 +1,16 @@
 <?php
 /** @var \app\models\LoginForm $model */
 
+use yii\helpers\Html;
+use yii\helpers\Url;
+use yii\widgets\ActiveForm;
+
+Yii::debug(Url::toRoute(['tasks/index']));
 ?>
 
 <section class="modal enter-form form-modal" id="enter-form">
     <h2>Вход на сайт</h2>
-    <?php
-    use yii\helpers\Html;
-    use yii\widgets\ActiveForm;
-
-    $form = ActiveForm::begin([
+    <?php $form = ActiveForm::begin([
         'enableAjaxValidation' => true, 'action' => ['auth/login'],
     ]); ?>
 

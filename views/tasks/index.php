@@ -1,4 +1,8 @@
 <?php
+/** @var app\controllers\TasksController $task */
+/** @var app\controllers\TasksController $models */
+/** @var app\controllers\TasksController $pages */
+/** @var app\controllers\TasksController $categories */
 
 use yii\helpers\BaseStringHelper;
 use yii\helpers\Html;
@@ -7,6 +11,9 @@ use yii\widgets\ActiveForm;
 use yii\widgets\LinkPager;
 
 $this->title = 'Посмотреть новые задания';
+Yii::debug($task->noResponses);
+Yii::debug($task->noLocation);
+Yii::debug($task->filterPeriod);
 ?>
 <main class="main-content container">
     <div class="left-column">
@@ -14,8 +21,7 @@ $this->title = 'Посмотреть новые задания';
         <?php foreach ($models as $model): ?>
             <div class="task-card">
                 <div class="header-task">
-                    <a href="<?= Url::toRoute(['tasks/view', 'id' => $model->id]
-                    ) ?>" class="link link--block link--big">
+                    <a href="<?= Url::toRoute(['tasks/view', 'id' => $model->id]) ?>" class="link link--block link--big">
                         <?= Html::encode($model->name) ?>
                     </a>
                     <p class="price price--task">

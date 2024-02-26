@@ -98,27 +98,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function getComments()
     {
-        return $this->hasMany(Comments::class, ['performer_id' => 'id']);
-    }
-
-    /**
-     * Gets query for [[Comments0]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getComments0()
-    {
         return $this->hasMany(Comments::class, ['author_id' => 'id']);
-    }
-
-    /**
-     * Gets query for [[PerformerStatuses]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getPerformerStatuses()
-    {
-        return $this->hasOne(PerformerStatus::class, ['performer_id' => 'id']);
     }
 
     /**
@@ -255,5 +235,4 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return true;
     }
-
 }

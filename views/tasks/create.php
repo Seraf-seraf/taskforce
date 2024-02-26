@@ -15,7 +15,6 @@ $this->title = 'Создать задание';
 <main class="main-content main-content--center container">
     <div class="add-task-form regular-form">
         <?php $form = ActiveForm::begin([
-            'enableAjaxValidation' => false,
             'action' => Url::toRoute(['tasks/create']),
             'options' => ['enctype' => 'multipart/form-data']
         ]); ?>
@@ -53,7 +52,7 @@ const dropzone = new Dropzone(".new-file", {
     },
     dictMaxFilesExceeded: "Достигнут лимит загрузки файлов: {{maxFiles}}",
     autoProcessQueue: true,
-    paramName: 'file'
+    paramName: 'uploadedFile'
 });
 JS, View::POS_READY);
 ?>

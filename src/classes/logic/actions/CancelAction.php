@@ -1,9 +1,7 @@
 <?php
 namespace TaskForce\logic\actions;
 
-require_once 'vendor/autoload.php';
-
-class CancelAction extends AbstractAction
+class CancelAction implements AbstractAction
 {
     public static function getLabel(): string
     {
@@ -15,8 +13,8 @@ class CancelAction extends AbstractAction
         return 'action_cancel';
     }
 
-    public static function checkRights(int $userID, int $cliendID, ?int $performerID): bool
+    public static function checkRights(int $userID, int $clientID, ?int $performerID): bool
     {
-        return $userID == $cliendID;
+        return $userID == $clientID;
     }
 }

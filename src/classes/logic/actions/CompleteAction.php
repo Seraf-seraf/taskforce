@@ -1,9 +1,7 @@
 <?php
 namespace TaskForce\logic\actions;
 
-require_once 'vendor/autoload.php';
-
-class CompleteAction extends AbstractAction
+class CompleteAction implements AbstractAction
 {
     public static function getLabel(): string
     {
@@ -15,9 +13,8 @@ class CompleteAction extends AbstractAction
         return 'action_complete';
     }
 
-    public static function checkRights(int $userID, int $cliendID, ?int $performerID): bool
+    public static function checkRights(int $userID, int $clientID, ?int $performerID): bool
     {
-        print_r($cliendID);
-        return $userID == $performerID;
+        return $userID == $clientID;
     }
 }

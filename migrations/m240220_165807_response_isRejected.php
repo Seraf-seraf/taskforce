@@ -12,7 +12,11 @@ class m240220_165807_response_isRejected extends Migration
      */
     public function safeUp()
     {
-
+        $this->addColumn(
+            'response',
+            'isRejected',
+            $this->integer()
+        );
     }
 
     /**

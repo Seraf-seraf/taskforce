@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use DateTime;
+
 /**
  * This is the model class for table "userSettings".
  *
@@ -36,8 +38,8 @@ class UserSettings extends \yii\db\ActiveRecord
             [['birthday'], 'safe'],
             [['description'], 'string'],
             [['avatar'], 'string', 'max' => 255],
-            [['phone'], 'string', 'pattern' => '/^[0-9]{11}$/'],
-            [['telegram'], 'string', 'min' => 5, 'max' => 64, 'pattern' => '/^[a-zA-Z0-9_]+$/'],
+            [['phone'], 'match', 'pattern' => '/^[0-9]{11}$/'],
+            [['telegram'], 'match', 'pattern' => '/^[a-zA-Z0-9_]+$/'],
             [['user_id'], 'unique'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'id']],
         ];
@@ -67,5 +69,18 @@ class UserSettings extends \yii\db\ActiveRecord
     public function getUser()
     {
         return $this->hasOne(User::class, ['id' => 'user_id']);
+    }
+
+    /**
+     * Получение возраста пользователя
+     *
+     * @return int
+     * @throws \Exception
+     */
+    public function getAge()
+    {
+        $now = new DateTime('now');
+        $birthday = new DateTime($this->birthday);
+        return $now->diff($birthday)->y;
     }
 }

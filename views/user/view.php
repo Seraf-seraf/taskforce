@@ -1,7 +1,7 @@
 <?php
 /** @var \app\controllers\UserController $responses */
 
-/** @var \app\controllers\UserController $model */
+/** @var \app\controllers\UserController $user */
 /** @var \app\controllers\UserController $categories */
 /** @var \app\controllers\UserController $error */
 /** @var \app\controllers\UserController $comments */
@@ -22,27 +22,27 @@ $this->title = 'Профиль пользователя';
     else: ?>
         <div class="left-column">
             <h3 class="head-main">
-                <?= Html::encode($model->name); ?>
+                <?= Html::encode($user->name); ?>
             </h3>
             <div class="user-card">
                 <div class="photo-rate">
                     <img class="card-photo" src="<?= Html::encode(
-                        $model->userSettings->avatar ?? ''
+                        $user->userSettings->avatar ?? ''
                     ); ?>" width="191" height="190" alt="Фото пользователя">
                     <div class="card-rate">
                         <?= UIHelper::getStarsByRate(
-                            $model->rating->userRating,
+                            $user->rating->userRating,
                             'big'
                         ) ?>
                         <span class="current-rate">
-                        <?= Html::encode($model->rating->userRating); ?>
+                        <?= Html::encode($user->rating->userRating); ?>
                     </span>
                     </div>
                 </div>
                 <?php
-                if ( ! empty($model->userSettings->description)): ?>
+                if ( ! empty($user->userSettings->description)): ?>
                     <p class="user-description">
-                        <?= Html::encode($model->userSettings->description); ?>
+                        <?= Html::encode($user->userSettings->description); ?>
                     </p>
                 <?php
                 endif; ?>
@@ -66,17 +66,12 @@ $this->title = 'Профиль пользователя';
                     <p class="head-info">Био</p>
                     <p class="bio-info">
                         <span class="town-info">
-                            <?= Html::encode($model->city->name); ?>
+                            <?= Html::encode($user->city->name); ?>
                         </span>
                         <?php
-                        if ( ! empty($model->userSettings->birthday)): ?>
+                        if ( ! empty($user->userSettings->birthday)): ?>
                             <span class="age-info">
-                                <?= date_diff(
-                                        new DateTime('now'),
-                                        new DateTime(
-                                            $model->userSettings->birthday
-                                        )
-                                    )->y.' лет'; ?>
+                                <?= $user->userSettings->getAge().' лет'; ?>
                             </span>
                         <?php
                         endif; ?>
@@ -127,26 +122,26 @@ $this->title = 'Профиль пользователя';
                     <dt>Всего заказов</dt>
                     <dd>
                         <?= Html::encode(
-                            $model->performer->rating->finishedTasks
+                            $user->performer->rating->finishedTasks
                         ); ?> выполнено,
                         <?= Html::encode(
-                            $model->performer->rating->failedTasks
+                            $user->performer->rating->failedTasks
                         ); ?> провалено
                     </dd>
                     <dt>Место в рейтинге</dt>
                     <dd>
-                        <?= Performer::getRatingPosition($model->id); ?>
+                        <?= Performer::getRatingPosition($user->id); ?>
                     </dd>
                     <dt>Дата регистрации</dt>
                     <dd>
                         <?= Yii::$app->formatter->asDateTime(
-                            $model->dateRegistration,
+                            $user->dateRegistration,
                             'php:j F, H:i'
                         ); ?>
                     </dd>
                     <dt>Статус</dt>
                     <dd>
-                        <?= Html::encode($model->performer->status->name); ?>
+                        <?= Html::encode($user->performer->status->name); ?>
                     </dd>
                 </dl>
             </div>
@@ -154,35 +149,35 @@ $this->title = 'Профиль пользователя';
                 <h4 class="head-card">Контакты</h4>
                 <ul class="enumeration-list">
                     <?php
-                    if ( ! empty($model->userSettings->phone)): ?>
+                    if ( ! empty($user->userSettings->phone)): ?>
                         <li class="enumeration-item">
-                            <a href="tel:<?= $model->userSettings->phone; ?>"
+                            <a href="tel:<?= $user->userSettings->phone; ?>"
                                class="link link--block link--phone">
                                 <?= Html::encode(
-                                    $model->userSettings->phone
+                                    $user->userSettings->phone
                                 ); ?>
                             </a>
                         </li>
                     <?php
                     endif; ?>
                     <?php
-                    if ($model->email): ?>
+                    if ($user->email): ?>
                         <li class="enumeration-item">
-                            <a href="mailto:<?= $model->email; ?>"
+                            <a href="mailto:<?= $user->email; ?>"
                                class="link link--block link--email">
-                                <?= Html::encode($model->email); ?>
+                                <?= Html::encode($user->email); ?>
                             </a>
                         </li>
                     <?php
                     endif; ?>
                     <?php
-                    if ( ! empty($model->userSettings->telegram)): ?>
+                    if ( ! empty($user->userSettings->telegram)): ?>
                         <li class="enumeration-item">
-                            <a href="https://telegram.me/<?= $model->userSettings->telegram; ?>"
+                            <a href="https://telegram.me/<?= $user->userSettings->telegram; ?>"
                                class="link link--block link--tg"
                                target="_blank">
                                 <?= Html::encode(
-                                    $model->userSettings->telegram
+                                    $user->userSettings->telegram
                                 ); ?>
                             </a>
                         </li>

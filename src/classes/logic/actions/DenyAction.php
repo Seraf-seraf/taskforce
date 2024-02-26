@@ -1,9 +1,7 @@
 <?php
 namespace TaskForce\logic\actions;
 
-require_once 'vendor/autoload.php';
-
-class DenyAction extends AbstractAction
+class DenyAction implements AbstractAction
 {
     public static function getLabel(): string
     {
@@ -15,7 +13,7 @@ class DenyAction extends AbstractAction
         return 'action_deny';
     }
 
-    public static function checkRights(int $userID, int $cliendID, ?int $performerID): bool
+    public static function checkRights(int $userID, int $clientID, ?int $performerID): bool
     {
         return $userID == $performerID;
     }

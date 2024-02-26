@@ -21,7 +21,7 @@ class File extends ActiveRecord
     /**
      * @var \yii\web\UploadedFile|null
      */
-    public $file;
+    public $uploadedFile;
 
     /**
      * {@inheritdoc}
@@ -37,10 +37,10 @@ class File extends ActiveRecord
     public function rules()
     {
         return [
-            [['file'], 'file', 'skipOnEmpty' => false, 'maxFiles' => 4],
+            [['uploadedFile'], 'file'],
             [['task_uid', 'name', 'path'], 'required'],
             [['path'], 'unique'],
-            [['name', 'path'], 'string', 'max' => 128],
+            [['name', 'path'], 'string', 'max' => 255],
         ];
     }
 
@@ -52,6 +52,7 @@ class File extends ActiveRecord
         return [
             'id'       => 'ID',
             'task_uid' => 'Task uID',
+            'uploadedFile' => 'Загруженный файл',
             'name'     => 'Name',
             'path'     => 'Path',
             'size'     => 'Size',
@@ -70,16 +71,14 @@ class File extends ActiveRecord
 
     public function upload()
     {
-        if ($this->file) {
-            $this->name = $this->file->name;
-            $this->path = '/uploads/' . uniqid() . '.' . $this->file->getExtension();
-            $this->size = $this->file->size;
+        $this->name = $this->uploadedFile->name;
+        $this->path = '/uploads/' . uniqid() . '.' . $this->uploadedFile->getExtension();
+        $this->size = $this->uploadedFile->size;
 
-            if ($this->save()) {
-                return $this->file->saveAs('@webroot/' . $this->path);
-            }
-
+        if ($this->save()) {
+            return $this->uploadedFile->saveAs('@webroot/' . $this->path);
         }
+
         return false;
     }
 }

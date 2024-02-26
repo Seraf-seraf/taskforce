@@ -9,36 +9,30 @@ use TaskForce\logic\actions\CompleteAction;
 use TaskForce\logic\actions\DenyAction;
 use TaskForce\logic\actions\ResponseAction;
 
-require_once 'vendor/autoload.php';
-
 class AvailableActions
 {
-    const STATUS_NEW = 'new';
-    const STATUS_CANCEL = 'canceled';
-    const STATUS_IN_PROGRESS = 'proceed';
-    const STATUS_COMPLETE = 'complete';
-    const STATUS_EXPIRED = 'expired';
+    public const STATUS_NEW = 1;
+    public const STATUS_CANCEL = 2;
+    public const STATUS_IN_PROGRESS = 3;
+    public const STATUS_COMPLETE = 4;
+    public const STATUS_EXPIRED = 5;
 
-    const ROLE_PERFORMER = 'performer';
-    const ROLE_CLIENT = 'client';
+    public const PERFORMER_FREE = 1;
+    public const PERFORMER_BUSY = 2;
 
-    private DateTime $_finishDate;
+    public const ROLE_PERFORMER = 'performer';
+    public const ROLE_CLIENT = 'client';
 
     private ?int $_performerID;
     private int $_clientID;
     private string $_status;
 
-
     /**
      * Конструктор задачи и ее статуса
      *
-     * @param string   $status 
-     * @param int      $cliendID 
-     * @param null|int $performerID
-     * 
-     * @throws StatusActionExeption
-     * 
-     * @return void 
+     * @param  string  $status
+     * @param  int  $clientID
+     * @param  null|int  $performerID
      */
     public function __construct(string $status, int $clientID, ?int $performerID = null)
     {
@@ -48,15 +42,15 @@ class AvailableActions
         $this->_clientID = $clientID;
     }
 
-
     /**
      * Возвращает действия, которые доступны для пользователя
      * в зависимости от его роли и статуса задачи
      *
-     * @param string $role Роль пользователя: Исполнитель или Заказчик
-     * @param int    $id   ID пользователя     
+     * @param  string  $role  Роль пользователя: Исполнитель или Заказчик
+     * @param  int  $id  ID пользователя, который залогинен на сайте
      *
      * @return array
+     * @throws \TaskForce\exceptions\StatusActionException
      */
     public function getAvailableActions(string $role, int $id): array
     {
@@ -66,7 +60,7 @@ class AvailableActions
         $roleActions = $this->_roleAllowedActions()[$role];
 
         $allowedActions = array_intersect($statusActions, $roleActions);
-        
+
         $allowedActions = array_filter(
             $allowedActions, function ($action) use ($id) {
                 return $action::checkRights($id, $this->_clientID, $this->_performerID);
@@ -94,9 +88,10 @@ class AvailableActions
             self::STATUS_EXPIRED,
         ];
 
-        if (in_array($status, $availableStatuses)) {
-            $this->_status = $status;
+        if (!in_array($status, $availableStatuses)) {
+            throw new StatusActionException("Неизвестный статус: $status");
         }
+        $this->_status = $status;
     }
 
 
@@ -132,8 +127,26 @@ class AvailableActions
     private function _statusAllowedActions(): array
     {
         $map = [
+            self::STATUS_NEW => [CancelAction::class, ResponseAction::class],
+            self::STATUS_CANCEL => [],
             self::STATUS_IN_PROGRESS => [DenyAction::class, CompleteAction::class],
-            self::STATUS_NEW => [CancelAction::class, ResponseAction::class]
+            self::STATUS_COMPLETE => [],
+            self::STATUS_EXPIRED => [],
+        ];
+
+        return $map;
+    }
+
+    /**
+     * Возвращает действия, доступные для каждой роли
+     *
+     * @return array
+     */
+    private function _roleAllowedActions()
+    {
+        $map = [
+            self::ROLE_PERFORMER => [ResponseAction::class, DenyAction::class],
+            self::ROLE_CLIENT => [CancelAction::class, CompleteAction::class]
         ];
 
         return $map;
@@ -154,23 +167,6 @@ class AvailableActions
 
         return $map;
     }
-
-
-    /**
-     * Возвращает действия, доступные для каждой роли
-     *
-     * @return array
-     */
-    private function _roleAllowedActions()
-    {
-        $map = [
-            self::ROLE_PERFORMER => [ResponseAction::class, DenyAction::class],
-            self::ROLE_CLIENT => [CancelAction::class, CompleteAction::class]
-        ];
-
-        return $map;
-    }
-
 
     /**
      * Устанавливает дедлайн задания

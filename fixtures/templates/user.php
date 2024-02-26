@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * @var $faker \Faker\Generator
+ */
 return [
     'name' => $faker->name,
     'email' => $faker->email,

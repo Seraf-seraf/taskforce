@@ -2,44 +2,18 @@
 namespace app\controllers;
 
 use app\models\File;
+use app\models\Performer;
 use app\models\Task;
 use app\models\TaskCategories;
+use TaskForce\logic\AvailableActions;
 use Yii;
 use yii\data\Pagination;
-use yii\filters\AccessControl;
-use yii\web\NotFoundHttpException;
+use yii\web\Response;
 use yii\web\UploadedFile;
+use yii\widgets\ActiveForm;
 
 class TasksController extends SecuredController
 {
-
-    public function behaviors()
-    {
-        return [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'allow'         => false,
-                        'roles'         => ['@'],
-                        'actions'       => ['create'],
-                        'matchCallback' => function ($rule, $action) {
-                            if (Yii::$app->user->identity->isPerformer) {
-                                return true;
-                            }
-                        },
-                        'denyCallback'  => function ($rule, $action) {
-                            return $this->goHome();
-                        },
-                    ],
-                    [
-                        'allow' => true,
-                        'roles' => ['@'],
-                    ],
-                ],
-            ],
-        ];
-    }
 
     public function actionIndex(): string
     {
@@ -47,14 +21,16 @@ class TasksController extends SecuredController
 
         if (Yii::$app->request->isPost) {
             $task->load(Yii::$app->request->post());
-            Yii::$app->session['filters'][] = $task->attributes;
-            Yii::$app->session['filters'][] = [
+            $filters = Yii::$app->session->get('filters');
+
+            $filters[] = $task->attributes;
+            $filters[] = [
                 'noLocation' => $task->noLocation,
                 'noResponses' => $task->noResponses,
-                'filterPeriod' => $task->filterPeriod
+                'filterPeriod' => $task->filterPeriod,
             ];
         } else {
-            $task->attributes = Yii::$app->session->get('filters', []);
+            $task->attributes = Yii::$app->session->get('filters');
         }
 
         $tasksQuery = $task->getSearchQuery()->with('category');
@@ -66,10 +42,7 @@ class TasksController extends SecuredController
             'pageSizeParam' => false,
         ]);
 
-        $models = $tasksQuery
-          ->offset($pages->offset)
-          ->limit($pages->limit)
-          ->all();
+        $models = $tasksQuery->offset($pages->offset)->limit($pages->limit)->all();
 
         $categories = TaskCategories::find()->all();
 
@@ -78,26 +51,31 @@ class TasksController extends SecuredController
             'pages' => $pages,
             'task' => $task,
             'categories' => $categories,
-            'tasksQuery' => $tasksQuery
+            'tasksQuery' => $tasksQuery,
         ]);
     }
 
-    public function actionView($id): string
+    public function actionView($id)
     {
         $task = Task::find()
-                     ->where(['id' => $id])
-                     ->with([
-                         'responses' => function ($query) {
-                             $query->with(
-                                 ['performer.userSettings', 'performer.rating']
-                             );
-                         },
-                     ])->one();
+                    ->where(['id' => $id])
+                    ->with([
+                        'responses' => function ($query) {
+                            $query->andWhere(['isRejected' => 0])
+                                  ->orderBy(['dateCreate' => SORT_ASC]);
+                        },
+                    ])
+                    ->one();
 
-        if ( ! $task) {
-            $error = new NotFoundHttpException('Error 404', 404);
+        if (!$task) {
+            return $this->redirect('error');
+        }
 
-            return $this->render('view', ['error' => $error]);
+        if ($task->taskStatus_id != AvailableActions::STATUS_NEW) {
+            $performer = Performer::find()->where(['task_id' => $task->id])->with('user')->one();
+            $performer_response = \app\models\Response::find()->where(['performer_id' => $performer->performer_id, 'task_id' => $task->id])->one();
+
+            return $this->render('view', ['task' => $task, 'performer' => $performer, 'performer_response' => $performer_response]);
         }
 
         return $this->render('view', ['task' => $task]);
@@ -105,11 +83,21 @@ class TasksController extends SecuredController
 
     public function actionCreate()
     {
+        if (Yii::$app->user->identity->isPerformer) {
+            return $this->goHome();
+        }
+
         $task = new Task();
         $categories = TaskCategories::find()->all();
 
         if (!Yii::$app->session->has('task_uid')) {
             Yii::$app->session->set('task_uid', uniqid('upload'));
+        }
+
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            return ActiveForm::validate($task);
         }
 
         if (Yii::$app->request->isPost) {
@@ -123,20 +111,25 @@ class TasksController extends SecuredController
             }
         }
 
-
         return $this->render('create', ['task' => $task, 'categories' => $categories]);
     }
 
-    public function actionUpload()
+    public function actionUpload(): ?Response
     {
         if (Yii::$app->request->isPost) {
             $model           = new File();
             $model->task_uid = Yii::$app->session->get('task_uid');
-            $model->file     = UploadedFile::getInstanceByName('file');
-
+            $model->uploadedFile = UploadedFile::getInstanceByName('uploadedFile');
+            Yii::$app->db->createCommand('SET FOREIGN_KEY_CHECKS=0')->execute();
             $model->upload();
-
+            Yii::$app->db->createCommand('SET FOREIGN_KEY_CHECKS=1')->execute();
             return $this->asJson($model->getAttributes());
         }
+        return null;
+    }
+
+    public function actionResponse()
+    {
+
     }
 }

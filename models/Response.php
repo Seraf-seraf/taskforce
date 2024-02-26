@@ -10,8 +10,11 @@ namespace app\models;
  * @property int $task_id
  * @property int|null $price
  * @property string|null $comment
+ * @property string $dateCreate
+ * @property int $isRejected
+ * @property int $isHolded
  *
- * @property User $performer
+ * @property Performer $performer
  * @property Task $task
  */
 class Response extends \yii\db\ActiveRecord
@@ -30,10 +33,11 @@ class Response extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['performer_id', 'task_id'], 'required'],
-            [['performer_id', 'task_id', 'price'], 'integer'],
+            [['performer_id', 'task_id', 'dateCreate'], 'required'],
+            [['performer_id', 'task_id', 'price', 'isRejected'], 'integer'],
+            [['dateCreate'], 'safe'],
             [['comment'], 'string', 'max' => 128],
-            [['performer_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['performer_id' => 'id']],
+            [['performer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Performer::class, 'targetAttribute' => ['performer_id' => 'performer_id']],
             [['task_id'], 'exist', 'skipOnError' => true, 'targetClass' => Task::class, 'targetAttribute' => ['task_id' => 'id']],
         ];
     }
@@ -49,6 +53,8 @@ class Response extends \yii\db\ActiveRecord
             'task_id' => 'Task ID',
             'price' => 'Price',
             'comment' => 'Comment',
+            'dateCreate' => 'Date Create',
+            'isRejected' => 'Is Rejected',
         ];
     }
 
