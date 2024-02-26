@@ -1130,7 +1130,7 @@ CREATE TABLE IF NOT EXISTS `comments` (
   KEY `performer_id` (`performer_id`),
   KEY `author_id` (`author_id`),
   KEY `task_id` (`task_id`),
-  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`performer_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_comments_performer` FOREIGN KEY (`performer_id`) REFERENCES `performer` (`performer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`author_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`task_id`) REFERENCES `task` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1147,9 +1147,27 @@ CREATE TABLE IF NOT EXISTS `file` (
   PRIMARY KEY (`id`) USING BTREE,
   KEY `FK_file_task` (`task_uid`),
   CONSTRAINT `FK_file_task` FOREIGN KEY (`task_uid`) REFERENCES `task` (`uid`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Дамп данных таблицы taskforce_db.file: ~0 rows (приблизительно)
+-- Дамп данных таблицы taskforce_db.file: ~4 rows (приблизительно)
+INSERT INTO `file` (`id`, `task_uid`, `name`, `path`, `size`) VALUES
+	(15, 'upload65d5322a68b47', 'Seraf-seraf.htm', '/uploads/65d53254a4e90.htm', 587720),
+	(16, 'upload65d5322a68b47', 'CertFix.001121.exe', '/uploads/65d532577eb2e.exe', 565392),
+	(17, 'upload65d5322a68b47', 'Shablon dogovora.docx', '/uploads/65d53259a7dfe.docx', 1459330),
+	(18, 'upload65da562f4dd8f', 'controller.png', '/uploads/65da56d16aab2.png', 156390),
+	(19, 'upload65da562f4dd8f', 'controller.png', '/uploads/65da56d55c9e9.png', 156390),
+	(20, 'upload65da562f4dd8f', 'controller.png', '/uploads/65da56f110f19.png', 156390),
+	(21, 'upload65da562f4dd8f', 'controller.png', '/uploads/65da585a0584a.png', 156390),
+	(22, 'upload65da562f4dd8f', 'controller.png', '/uploads/65da587feeecc.png', 156390),
+	(23, 'upload65da58e31b508', 'controller.png', '/uploads/65da5904b2f13.png', 156390),
+	(24, 'upload65da59304d13c', 'controller.png', '/uploads/65da5943d1dbb.png', 156390),
+	(25, 'upload65da59304d13c', 'controller.png', '/uploads/65da594697306.png', 156390),
+	(26, 'upload65da59679801e', 'controller.png', '/uploads/65da596a27722.png', 156390),
+	(27, 'upload65da59679801e', 'controller.png', '/uploads/65da597b6233c.png', 156390),
+	(28, 'upload65da59679801e', 'controller.png', '/uploads/65da59853aac3.png', 156390),
+	(29, 'upload65da5a8aab2d3', 'controller.png', '/uploads/65da5a9029fa9.png', 156390),
+	(30, 'upload65da5a8aab2d3', 'controller.png', '/uploads/65da5a943b519.png', 156390),
+	(31, 'upload65da5b27aed81', 'controller.png', '/uploads/65da5b2c8eed5.png', 156390);
 
 -- Дамп структуры для таблица taskforce_db.migration
 CREATE TABLE IF NOT EXISTS `migration` (
@@ -1169,19 +1187,26 @@ INSERT INTO `migration` (`version`, `apply_time`) VALUES
 	('m240209_103836_refactoryTablePerformerStatus', 1707476836),
 	('m240209_112127_addColumnTablePerformer', 1707478064),
 	('m240209_182655_tableFile', 1707503443),
-	('m240212_155632_addPrimaryKeyInUserSettings', 1707753921);
+	('m240212_155632_addPrimaryKeyInUserSettings', 1707753921),
+	('m240220_165807_response_isRejected', 1708448389);
 
 -- Дамп структуры для таблица taskforce_db.performer
 CREATE TABLE IF NOT EXISTS `performer` (
   `performer_id` int(11) NOT NULL,
   `status_id` int(11) DEFAULT '1',
+  `task_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`performer_id`) USING BTREE,
-  KEY `status_id` (`status_id`),
+  KEY `status_id` (`status_id`) USING BTREE,
+  KEY `task_id` (`task_id`),
   CONSTRAINT `performer_index` FOREIGN KEY (`performer_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `status_id` FOREIGN KEY (`status_id`) REFERENCES `performerStatus` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `status_id` FOREIGN KEY (`status_id`) REFERENCES `performerStatus` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_id` FOREIGN KEY (`task_id`) REFERENCES `task` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Дамп данных таблицы taskforce_db.performer: ~0 rows (приблизительно)
+-- Дамп данных таблицы taskforce_db.performer: ~2 rows (приблизительно)
+INSERT INTO `performer` (`performer_id`, `status_id`, `task_id`) VALUES
+	(35, 2, 95),
+	(37, 2, 95);
 
 -- Дамп структуры для таблица taskforce_db.performerStatus
 CREATE TABLE IF NOT EXISTS `performerStatus` (
@@ -1205,7 +1230,10 @@ CREATE TABLE IF NOT EXISTS `rating` (
   CONSTRAINT `rating_ibfk_1` FOREIGN KEY (`performer_id`) REFERENCES `performer` (`performer_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Дамп данных таблицы taskforce_db.rating: ~0 rows (приблизительно)
+-- Дамп данных таблицы taskforce_db.rating: ~2 rows (приблизительно)
+INSERT INTO `rating` (`performer_id`, `userRating`, `failedTasks`, `finishedTasks`) VALUES
+	(35, 5.00, 0, 0),
+	(37, 4.00, 0, 0);
 
 -- Дамп структуры для таблица taskforce_db.response
 CREATE TABLE IF NOT EXISTS `response` (
@@ -1215,14 +1243,17 @@ CREATE TABLE IF NOT EXISTS `response` (
   `price` int(11) DEFAULT NULL,
   `comment` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `dateCreate` datetime NOT NULL,
+  `isRejected` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `performer_id` (`performer_id`),
   KEY `task_id` (`task_id`),
-  CONSTRAINT `response_ibfk_1` FOREIGN KEY (`performer_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_response_performer` FOREIGN KEY (`performer_id`) REFERENCES `performer` (`performer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `response_ibfk_2` FOREIGN KEY (`task_id`) REFERENCES `task` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Дамп данных таблицы taskforce_db.response: ~0 rows (приблизительно)
+-- Дамп данных таблицы taskforce_db.response: ~1 rows (приблизительно)
+INSERT INTO `response` (`id`, `performer_id`, `task_id`, `price`, `comment`, `dateCreate`, `isRejected`) VALUES
+	(1, 35, 95, 111, 'за сотку сделаю, чушпан', '2024-02-20 00:00:00', 0);
 
 -- Дамп структуры для таблица taskforce_db.task
 CREATE TABLE IF NOT EXISTS `task` (
@@ -1246,9 +1277,17 @@ CREATE TABLE IF NOT EXISTS `task` (
   CONSTRAINT `task_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `user` (`id`),
   CONSTRAINT `task_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `taskCategories` (`id`),
   CONSTRAINT `task_ibfk_3` FOREIGN KEY (`taskStatus_id`) REFERENCES `taskStatus` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=94 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Дамп данных таблицы taskforce_db.task: ~0 rows (приблизительно)
+-- Дамп данных таблицы taskforce_db.task: ~1 rows (приблизительно)
+INSERT INTO `task` (`id`, `client_id`, `taskStatus_id`, `category_id`, `uid`, `name`, `location`, `budget`, `deadline`, `finished`, `description`, `dateCreate`) VALUES
+	(95, 34, 1, 5, 'upload65d5322a68b47', 'Второе задание', '', 1, '2024-02-25 00:00:00', NULL, 'Нужно покрасить стену здания за 5 часв и 5 секунд', '2024-02-21 02:14:42'),
+	(96, 34, 1, 3, 'upload65da562f4dd8f', 'Задание которое я создал', '', NULL, NULL, NULL, 'http://taskforce.ss/view/95http://taskforce.ss/view/95http://taskforce.ss/view/95', '2024-02-24 23:59:18'),
+	(97, 34, 1, 3, 'upload65da58b527ea1', 'Задание которое я создал', '', NULL, NULL, NULL, '', '2024-02-25 00:00:17'),
+	(98, 34, 1, 5, 'upload65da58e31b508', 'kopkoipkop', '', NULL, '2024-02-29 00:00:00', NULL, 'http://taskforce.ss/view/95http://taskforce.ss/view/95http://taskforce.ss/view/95', '2024-02-25 00:00:53'),
+	(99, 34, 1, 3, 'upload65da594813032', 'http://taskforce.ss/view/95http://taskforce.ss/vie', '', NULL, '2024-02-29 00:00:00', NULL, 'feffewefewfewffewfewfwfefwffwfefewf', '2024-02-25 00:02:00'),
+	(100, 34, 1, 2, 'upload65da59679801e', 'feffewefewfewffewfewfwfefwffwfefewf', '', NULL, '2024-03-01 00:00:00', NULL, 'feffewefewfewffewfewfwfefwffwfefewffeffewefewfewffewfewfwfefwffwfefewf', '2024-02-25 00:03:02'),
+	(101, 34, 1, 3, 'upload65da5a8aab2d3', 'addRemoveLinks: true,', 'addRemoveLinks: true,', 111, '2024-02-29 00:00:00', NULL, 'addRemoveLinks: true,addRemoveLinks: true,', '2024-02-25 00:07:50');
 
 -- Дамп структуры для таблица taskforce_db.taskCategories
 CREATE TABLE IF NOT EXISTS `taskCategories` (
@@ -1279,10 +1318,10 @@ CREATE TABLE IF NOT EXISTS `taskStatus` (
 -- Дамп данных таблицы taskforce_db.taskStatus: ~5 rows (приблизительно)
 INSERT INTO `taskStatus` (`id`, `name`) VALUES
 	(1, 'В поиске исполнителя'),
-	(2, 'canceled'),
-	(3, 'proceed'),
+	(2, 'Задание отменено'),
+	(3, 'На исполнении'),
 	(4, 'Задание выполнено'),
-	(5, 'expired');
+	(5, 'Истёк срок выполнения');
 
 -- Дамп структуры для таблица taskforce_db.user
 CREATE TABLE IF NOT EXISTS `user` (
@@ -1296,9 +1335,13 @@ CREATE TABLE IF NOT EXISTS `user` (
   PRIMARY KEY (`id`),
   KEY `city_id` (`city_id`),
   CONSTRAINT `user_ibfk_1` FOREIGN KEY (`city_id`) REFERENCES `city` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Дамп данных таблицы taskforce_db.user: ~0 rows (приблизительно)
+-- Дамп данных таблицы taskforce_db.user: ~3 rows (приблизительно)
+INSERT INTO `user` (`id`, `name`, `email`, `password`, `city_id`, `isPerformer`, `dateRegistration`) VALUES
+	(34, 'Заказчик', 'serafim123sima@mail.ru', '$2y$13$CiRh3Qo7kgExHCzWRRCPeuKv696CxCquaXDlen9kB7XWrFld.QEX2', 1, 0, '2024-02-20 21:13:39'),
+	(35, 'Исполнитель', 'serafim123sima@mail.ru2', '$2y$13$5Lk9BptrgUAmF97Ox5U74u8S99gyaTFbsucdxs7rVvXstCt9wlhFW', 1, 1, '2024-02-20 21:14:08'),
+	(37, 'Исполнитель 2', 'serafim123sima@mail.ru3', '$2y$13$aDB/femtyUdQQJcaJIzAi.iiovoI5FNDb9uhncxficQm.sAbz.EDm', 1, 1, '2024-02-20 21:37:13');
 
 -- Дамп структуры для таблица taskforce_db.userSettings
 CREATE TABLE IF NOT EXISTS `userSettings` (
@@ -1314,7 +1357,11 @@ CREATE TABLE IF NOT EXISTS `userSettings` (
   CONSTRAINT `usersettings_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Дамп данных таблицы taskforce_db.userSettings: ~0 rows (приблизительно)
+-- Дамп данных таблицы taskforce_db.userSettings: ~3 rows (приблизительно)
+INSERT INTO `userSettings` (`user_id`, `avatar`, `phone`, `telegram`, `birthday`, `description`, `privateContacts`) VALUES
+	(34, 'img/avatars/no_foto_49.png', NULL, NULL, NULL, NULL, 0),
+	(35, 'img/avatars/no_foto_49.png', NULL, NULL, '2019-02-23', NULL, 0),
+	(37, 'img/avatars/no_foto_49.png', NULL, NULL, NULL, NULL, 0);
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
