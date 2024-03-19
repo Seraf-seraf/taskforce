@@ -85,7 +85,7 @@ class ResponsesController extends SecuredController
             $newResponse->task_id = $id;
             $newResponse->performer_id = Yii::$app->user->id;
 
-            $newResponse->save();
+            $newResponse->save(false);
 
             return $this->redirect(['tasks/view', 'id' => $task->id]);
         }

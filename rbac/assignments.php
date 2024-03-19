@@ -52,4 +52,10 @@ return [
     11 => [
         'client',
     ],
+    12 => [
+        'performer',
+    ],
+    13 => [
+        'performer',
+    ],
 ];

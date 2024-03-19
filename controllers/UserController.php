@@ -36,8 +36,11 @@ class UserController extends SecuredController
         $categories = TaskCategories::findAll($selectedCategoriesId);
 
         $comments = Comments::find()
-                            ->where(['performer_id' => $id])
-                            ->all();
+            ->innerJoin('task', 'task.id = comments.task_id')
+            ->where(['comments.performer_id' => $id])
+            ->orderBy('task.finished DESC')
+            ->limit(5)
+            ->all();
 
         if ($settings->privateContacts && Yii::$app->user->id != $id) {
             $showContacts = Task::find()->innerJoin('performer', 'performer.performer_id = task.performer_id')
