@@ -1,4 +1,5 @@
 <?php
+
 namespace TaskForce\logic\actions;
 
 class CancelAction implements AbstractAction

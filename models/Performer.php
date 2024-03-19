@@ -9,18 +9,13 @@ use yii\db\Query;
  *
  * @property int $performer_id
  * @property int|null $status_id
- * @property int|null $task_id
- *
- * @property User $performer
- * @property Rating $rating
- * @property PerformerStatus $status
  */
 class Performer extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'performer';
     }
@@ -28,27 +23,25 @@ class Performer extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['performer_id'], 'required'],
-            [['performer_id', 'status_id', 'task_id'], 'integer'],
+            [['performer_id', 'status_id'], 'integer'],
             [['performer_id'], 'unique'],
             [['performer_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['performer_id' => 'id']],
             [['status_id'], 'exist', 'skipOnError' => true, 'targetClass' => PerformerStatus::class, 'targetAttribute' => ['status_id' => 'id']],
-            [['task_id'], 'exist', 'skipOnError' => true, 'targetClass' => Task::class, 'targetAttribute' => ['task_id' => 'id']],
         ];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'performer_id' => 'Performer ID',
             'status_id' => 'Status ID',
-            'task_id' => 'Task ID'
         ];
     }
 
@@ -57,7 +50,7 @@ class Performer extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getUser()
+    public function getUser(): \yii\db\ActiveQuery
     {
         return $this->hasOne(User::class, ['id' => 'performer_id']);
     }
@@ -67,9 +60,9 @@ class Performer extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getTask()
+    public function getTask(): \yii\db\ActiveQuery
     {
-        return $this->hasOne(Task::class, ['id' => 'task_id']);
+        return $this->hasOne(Task::class, ['performer_id' => 'performer_id']);
     }
 
     /**
@@ -77,7 +70,7 @@ class Performer extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getRating()
+    public function getRating(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Rating::class, ['performer_id' => 'performer_id']);
     }
@@ -87,7 +80,7 @@ class Performer extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getStatus()
+    public function getStatus(): \yii\db\ActiveQuery
     {
         return $this->hasOne(PerformerStatus::class, ['id' => 'status_id']);
     }
@@ -97,15 +90,15 @@ class Performer extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getComments()
+    public function getComments(): \yii\db\ActiveQuery
     {
         return $this->hasMany(Comments::class, ['performer_id' => 'performer_id']);
     }
 
 
-    public static function getRatingPosition($id)
+    public static function getRatingPosition(int $id): int
     {
-        $place = (new Query())
+        return (new Query())
             ->select(['COUNT(performer_id) + 1'])
             ->from('rating')
             ->where([
@@ -118,7 +111,5 @@ class Performer extends \yii\db\ActiveRecord
             ])
             ->orderBy(['userRating' => 'DESC'])
             ->scalar();
-
-        return $place;
     }
 }

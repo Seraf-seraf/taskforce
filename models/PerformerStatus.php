@@ -6,16 +6,17 @@ namespace app\models;
  * This is the model class for table "performerStatus".
  *
  * @property int $id
- * @property string|null $name
- *
- * @property Performer[] $performers
+ * @property string $name
  */
 class PerformerStatus extends \yii\db\ActiveRecord
 {
+    public const PERFORMER_FREE = 1;
+    public const PERFORMER_BUSY = 2;
+
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'performerStatus';
     }
@@ -23,7 +24,7 @@ class PerformerStatus extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['name'], 'string', 'max' => 64],
@@ -33,7 +34,7 @@ class PerformerStatus extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id'   => 'ID',
@@ -46,7 +47,7 @@ class PerformerStatus extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getPerformers()
+    public function getPerformers(): \yii\db\ActiveQuery
     {
         return $this->hasMany(Performer::class, ['status_id' => 'id']);
     }

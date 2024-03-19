@@ -8,21 +8,17 @@ namespace app\models;
  * @property int $id
  * @property int $performer_id
  * @property int $task_id
- * @property int|null $price
- * @property string|null $comment
+ * @property int $price
+ * @property string $comment
  * @property string $dateCreate
  * @property int $isRejected
- * @property int $isHolded
- *
- * @property Performer $performer
- * @property Task $task
  */
 class Response extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'response';
     }
@@ -30,29 +26,42 @@ class Response extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            [['performer_id', 'task_id', 'dateCreate'], 'required'],
-            [['performer_id', 'task_id', 'price', 'isRejected'], 'integer'],
-            [['dateCreate'], 'safe'],
+            [['task_id', 'price', 'isRejected'], 'integer'],
+            [['comment', 'price'], 'required'],
+            [['price'], 'integer', 'min' => 0, 'max' => 100000, 'message' => 'Число должно быть целым положительным'],
+            [
+                ['comment'],
+                'unique',
+                'targetAttribute' => ['performer_id', 'task_id'],
+                'message' => 'Вы уже оставляли отклик'
+            ],
+            [['dateCreate'], 'default', 'value' => date('Y-m-d H:i:s')],
             [['comment'], 'string', 'max' => 128],
-            [['performer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Performer::class, 'targetAttribute' => ['performer_id' => 'performer_id']],
             [['task_id'], 'exist', 'skipOnError' => true, 'targetClass' => Task::class, 'targetAttribute' => ['task_id' => 'id']],
+            [
+                ['performer_id'],
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => Performer::class,
+                'targetAttribute' => ['performer_id' => 'performer_id']
+            ],
         ];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => 'ID',
             'performer_id' => 'Performer ID',
             'task_id' => 'Task ID',
-            'price' => 'Price',
-            'comment' => 'Comment',
+            'price' => 'Стоимость',
+            'comment' => 'Ваш комментарий',
             'dateCreate' => 'Date Create',
             'isRejected' => 'Is Rejected',
         ];
@@ -63,9 +72,9 @@ class Response extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getPerformer()
+    public function getPerformer(): \yii\db\ActiveQuery
     {
-        return $this->hasOne(User::class, ['id' => 'performer_id']);
+        return $this->hasOne(Performer::class, ['performer_id' => 'performer_id']);
     }
 
     /**
@@ -73,7 +82,7 @@ class Response extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getTask()
+    public function getTask(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Task::class, ['id' => 'task_id']);
     }

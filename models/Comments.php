@@ -7,21 +7,17 @@ namespace app\models;
  *
  * @property int $id
  * @property int $performer_id
- * @property int $author_id
+ * @property int $client_id
  * @property int $task_id
  * @property int $mark
- * @property string|null $comment
- *
- * @property User $author
- * @property User $performer
- * @property Task $task
+ * @property string $comment
  */
 class Comments extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'comments';
     }
@@ -29,14 +25,30 @@ class Comments extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            [['performer_id', 'author_id', 'task_id', 'mark'], 'required'],
-            [['performer_id', 'author_id', 'task_id', 'mark'], 'integer'],
-            [['comment'], 'string', 'max' => 128],
-            [['performer_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['performer_id' => 'id']],
-            [['author_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['author_id' => 'id']],
+            [['comment', 'mark'], 'required'],
+            [['mark'], 'integer', 'min' => 1, 'max' => 5],
+            [
+                ['comment'],
+                'unique',
+                'targetAttribute' => ['task_id', 'performer_id'],
+                'message' => 'Вы уже осталвляли отзыв об этом исполнителе!'
+            ],
+            [['comment'], 'string', 'length' => [10, 128]],
+            [
+                ['performer_id'],
+                'exist',
+                'targetClass' => Performer::class,
+                'targetAttribute' => ['performer_id' => 'performer_id']
+            ],
+            [
+                ['client_id'],
+                'exist',
+                'targetClass' => Task::class,
+                'targetAttribute' => ['client_id' => 'client_id']
+            ],
             [['task_id'], 'exist', 'skipOnError' => true, 'targetClass' => Task::class, 'targetAttribute' => ['task_id' => 'id']],
         ];
     }
@@ -44,26 +56,26 @@ class Comments extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => 'ID',
             'performer_id' => 'Performer ID',
-            'author_id' => 'Author ID',
+            'client_id' => 'Client ID',
             'task_id' => 'Task ID',
-            'mark' => 'Mark',
-            'comment' => 'Comment',
+            'mark' => 'Оценка',
+            'comment' => 'Отзыв о работе',
         ];
     }
 
     /**
-     * Gets query for [[Author]].
+     * Gets query for [[Client]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getAuthor()
+    public function getClient(): \yii\db\ActiveQuery
     {
-        return $this->hasOne(User::class, ['id' => 'author_id']);
+        return $this->hasOne(User::class, ['id' => 'client_id']);
     }
 
     /**
@@ -71,7 +83,7 @@ class Comments extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getPerformer()
+    public function getPerformer(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Performer::class, ['performer_id' => 'performer_id']);
     }
@@ -81,7 +93,7 @@ class Comments extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getTask()
+    public function getTask(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Task::class, ['id' => 'task_id']);
     }

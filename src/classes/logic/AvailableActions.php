@@ -1,7 +1,7 @@
 <?php
+
 namespace TaskForce\logic;
 
-use DateTime;
 use TaskForce\exceptions\StatusActionException;
 use TaskForce\logic\actions\AbstractAction;
 use TaskForce\logic\actions\CancelAction;
@@ -17,9 +17,6 @@ class AvailableActions
     public const STATUS_COMPLETE = 4;
     public const STATUS_EXPIRED = 5;
 
-    public const PERFORMER_FREE = 1;
-    public const PERFORMER_BUSY = 2;
-
     public const ROLE_PERFORMER = 'performer';
     public const ROLE_CLIENT = 'client';
 
@@ -30,9 +27,9 @@ class AvailableActions
     /**
      * Конструктор задачи и ее статуса
      *
-     * @param  string  $status
-     * @param  int  $clientID
-     * @param  null|int  $performerID
+     * @param string $status
+     * @param int $clientID
+     * @param null|int $performerID
      */
     public function __construct(string $status, int $clientID, ?int $performerID = null)
     {
@@ -43,39 +40,10 @@ class AvailableActions
     }
 
     /**
-     * Возвращает действия, которые доступны для пользователя
-     * в зависимости от его роли и статуса задачи
-     *
-     * @param  string  $role  Роль пользователя: Исполнитель или Заказчик
-     * @param  int  $id  ID пользователя, который залогинен на сайте
-     *
-     * @return array
-     * @throws \TaskForce\exceptions\StatusActionException
-     */
-    public function getAvailableActions(string $role, int $id): array
-    {
-        $this->checkRole($role);
-
-        $statusActions = $this->_statusAllowedActions()[$this->_status];
-        $roleActions = $this->_roleAllowedActions()[$role];
-
-        $allowedActions = array_intersect($statusActions, $roleActions);
-
-        $allowedActions = array_filter(
-            $allowedActions, function ($action) use ($id) {
-                return $action::checkRights($id, $this->_clientID, $this->_performerID);
-            }
-        );
-
-        return array_values($allowedActions);
-    }
-
-
-    /**
      * Устанавливает статус
-     * 
+     *
      * @param string $status Статус задачи
-     * 
+     *
      * @return void
      */
     private function _setStatus($status): void
@@ -94,34 +62,53 @@ class AvailableActions
         $this->_status = $status;
     }
 
-
     /**
-     * Устанавливает следущий статус 
-     * после выполнения определенного действия
+     * Возвращает действия, которые доступны для пользователя
+     * в зависимости от его роли и статуса задачи
      *
-     * @param AbstractAction $action Принимает класс действия
-     * 
-     * @return null|string
+     * @param string $role Роль пользователя: Исполнитель или Заказчик
+     * @param int $id ID пользователя, который залогинен на сайте
+     *
+     * @return array
+     * @throws \TaskForce\exceptions\StatusActionException
      */
-    public function getNextStatus(AbstractAction $action): ?string
+    public function getAvailableActions(string $role, int $id): array
     {
-        $map = [
-            CompleteAction::class => self::STATUS_COMPLETE,
-            CancelAction::class => self::STATUS_CANCEL,
-            DenyAction::class => self::STATUS_CANCEL
-        ];
+        $this->checkRole($role);
 
-        if (!in_array(get_class($action), $map)) {
-            throw new StatusActionException("Ошибка! Передайте другой класс действия!");
+        $statusActions = $this->_statusAllowedActions()[$this->_status];
+        $roleActions = $this->_roleAllowedActions()[$role];
+
+        $allowedActions = array_intersect($statusActions, $roleActions);
+
+        $allowedActions = array_filter(
+            $allowedActions, function ($action) use ($id) {
+            return $action::checkRights($id, $this->_clientID, $this->_performerID);
         }
+        );
 
-        return $map[get_class($action)];
+        return array_values($allowedActions);
     }
 
+    /**
+     * Проверка роли
+     *
+     * @param string $role Роль пользователя
+     *
+     * @return void
+     */
+    private function checkRole(string $role): void
+    {
+        $availableRoles = [self::ROLE_PERFORMER, self::ROLE_CLIENT];
+
+        if (!in_array($role, $availableRoles)) {
+            throw new StatusActionException("Указана несуществующая роль: $role");
+        }
+    }
 
     /**
      * Возвращает действия, доступные для опредленного статуса
-     *  
+     *
      * @return array
      */
     private function _statusAllowedActions(): array
@@ -153,51 +140,21 @@ class AvailableActions
     }
 
     /**
-     * Возвращает карту статусов
+     * Устанавливает следущий статус
+     * после выполнения определенного действия
      *
-     * @return array
+     * @param AbstractAction $action Принимает класс действия
+     *
+     * @return null|string
      */
-    private function _getStatusMap(): array
+    public function getNextStatus(AbstractAction $action): ?string
     {
         $map = [
-            self::STATUS_NEW => [self::STATUS_IN_PROGRESS, self::STATUS_CANCEL, self::STATUS_EXPIRED],
-            self::STATUS_IN_PROGRESS => [self::STATUS_CANCEL, self::STATUS_COMPLETE, self::STATUS_EXPIRED],
-            self::STATUS_EXPIRED => [self::STATUS_CANCEL]
+            CompleteAction::class => self::STATUS_COMPLETE,
+            CancelAction::class => self::STATUS_CANCEL,
+            DenyAction::class => self::STATUS_CANCEL
         ];
 
-        return $map;
-    }
-
-    /**
-     * Устанавливает дедлайн задания
-     *
-     * @param DateTime $date Объект даты
-     * 
-     * @return void
-     */
-    public function setFinishDate(DateTime $date): void
-    {
-        $currentDate = new DateTime();
-
-        if ($date > $currentDate) {
-            $this->_finishDate = $date;
-        }
-    }
-
-
-    /**
-     * Проверка роли
-     * 
-     * @param string $role Роль пользователя
-     * 
-     * @return void
-     */
-    private function checkRole(string $role): void
-    {
-        $availableRoles = [self::ROLE_PERFORMER, self::ROLE_CLIENT];
-
-        if (!in_array($role, $availableRoles)) {
-            throw new StatusActionException("Указана несуществующая роль: $role");
-        }
+        return $map[get_class($action)];
     }
 }

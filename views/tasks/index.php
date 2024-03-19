@@ -1,5 +1,4 @@
 <?php
-/** @var app\controllers\TasksController $task */
 /** @var app\controllers\TasksController $models */
 /** @var app\controllers\TasksController $pages */
 /** @var app\controllers\TasksController $categories */
@@ -10,10 +9,7 @@ use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use yii\widgets\LinkPager;
 
-$this->title = 'Посмотреть новые задания';
-Yii::debug($task->noResponses);
-Yii::debug($task->noLocation);
-Yii::debug($task->filterPeriod);
+$this->title = 'Новые задания';
 ?>
 <main class="main-content container">
     <div class="left-column">
@@ -21,32 +17,41 @@ Yii::debug($task->filterPeriod);
         <?php foreach ($models as $model): ?>
             <div class="task-card">
                 <div class="header-task">
-                    <a href="<?= Url::toRoute(['tasks/view', 'id' => $model->id]) ?>" class="link link--block link--big">
-                        <?= Html::encode($model->name) ?>
-                    </a>
-                    <p class="price price--task">
-                        <?= isset($model->budget) ? Html::encode($model->budget) . ' ₽' : 'Договорная' ?>
-                    </p>
+                    <?= Html::a(
+                        Html::encode($model->name),
+                        Url::toRoute(['tasks/view', 'id' => $model->id]),
+                        ['class' => "link link--block link--big"]
+                    ); ?>
+                    <?= Html::tag(
+                        'p',
+                        empty($model->budget) ? '' : Html::encode($model->budget) . ' ₽',
+                        ['class' => 'price price--task']
+                    ); ?>
                 </div>
                 <p class="info-text">
                     <span class="current-time">
                         <?= Yii::$app->formatter->asRelativeTime($model->dateCreate)?>
                     </span>
                 </p>
-                <p class="task-text">
-                    <?= Html::encode(BaseStringHelper::truncate($model->description, 200)) ?? '' ?>
-                </p>
+                <?= Html::tag(
+                    'p',
+                    Html::encode(BaseStringHelper::truncate($model->description, 200)) ?? '',
+                    ['class' => 'task-text']
+                ); ?>
                 <div class="footer-task">
                     <?php if($model->location): ?>
-                        <p class="info-text town-text">
-                            <?= Html::encode($model->location) ?>
-                        </p>
+                        <?= Html::tag('p', Html::encode($model->city->name), ['class' => 'info-text town-text']); ?>
                     <?php endif ?>
-                    <p class="info-text category-text">
-                        <?= Html::encode($model->category->name) ?>
-                    </p>
-                    <a href="<?= Url::toRoute(['tasks/view', 'id' => $model->id]
-                    ) ?>" class="button button--black">Смотреть Задание</a>
+                    <?= Html::tag(
+                        'p',
+                        Html::encode($model->category->name),
+                        ['class' => 'info-text ' . Html::encode($model->category->icon) . ' category-text']
+                    ); ?>
+                    <?= Html::a(
+                        'Смотреть задание',
+                        Url::toRoute(['tasks/view', 'id' => $model->id]),
+                        ['class' => 'button button--black']
+                    ); ?>
                 </div>
             </div>
         <?php endforeach ?>
@@ -69,7 +74,8 @@ Yii::debug($task->filterPeriod);
     <div class="right-column">
        <div class="right-card black">
            <div class="search-form">
-                <?php $form = ActiveForm::begin(); ?>
+               <?php
+               $form = ActiveForm::begin(['action' => ['tasks/index']]); ?>
                     <h4 class="head-card">Категории</h4>
                     <div class="checkbox-wrapper">
                         <?= Html::activeCheckboxList($task, 'category_id', array_column($categories, 'name', 'id'),

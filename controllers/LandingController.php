@@ -9,7 +9,7 @@ use yii\web\Controller;
 class LandingController extends Controller
 {
 
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'access' => [
@@ -31,7 +31,7 @@ class LandingController extends Controller
         ];
     }
 
-    public function actionIndex()
+    public function actionIndex(): string
     {
         $this->layout = '/landing';
 

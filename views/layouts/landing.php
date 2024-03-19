@@ -102,10 +102,7 @@ $this->beginBody(); ?>
                    data-for="enter-form">
                     <span>Вход</span></a>
                 или
-                <a href="<?= Url::to('/sign-up'); ?>"
-                   class="header__account-registration">
-                    Регистрация
-                </a>
+                <?= Html::a('Регистрация', Url::to('/sign-up'), ['class' => 'header__account-registration']); ?>
             </div>
         </div>
     </header>
@@ -212,7 +209,7 @@ $this->beginBody(); ?>
         <div class="main-container page-footer__container">
             <div class="page-footer__info">
                 <p class="page-footer__info-copyright">
-                    © 2021, ООО «ТаскФорс»
+                    © 2024, ООО «ТаскФорс»
                     Все права защищены
                 </p>
                 <p class="page-footer__info-use">
@@ -224,22 +221,7 @@ $this->beginBody(); ?>
             <div class="page-footer__links">
                 <ul class="links__list">
                     <li class="links__item">
-                        <a href="">Задания</a>
-                    </li>
-                    <li class="links__item">
-                        <a href="">Мой профиль</a>
-                    </li>
-                    <li class="links__item">
-                        <a href="">Исполнители</a>
-                    </li>
-                    <li class="links__item">
-                        <a href="<?= Url::to('/sign-up'); ?>">Регистрация</a>
-                    </li>
-                    <li class="links__item">
-                        <a href="">Создать задание</a>
-                    </li>
-                    <li class="links__item">
-                        <a href="">Справка</a>
+                        <?= Html::a('Регистрация', Url::to('/sign-up'), ['class' => 'header__account-registration']); ?>
                     </li>
                 </ul>
             </div>

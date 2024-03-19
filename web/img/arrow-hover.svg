@@ -8,7 +8,8 @@
             <g id="header" transform="translate(31.000000, 1344.000000)">
                 <g id="arrow_dropdown" transform="translate(1237.000000, 30.000000)">
                     <circle id="Oval" cx="15" cy="15" r="15"></circle>
-                    <polyline id="Line" stroke="#05060F" stroke-width="3" stroke-linecap="round" points="22 13 15.1385307 19 8 13"></polyline>
+                    <polyline id="Line" stroke="#05060F" stroke-width="3" stroke-linecap="round"
+                              points="22 13 15.1385307 19 8 13"></polyline>
                 </g>
             </g>
         </g>

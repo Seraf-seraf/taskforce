@@ -6,18 +6,16 @@ namespace app\models;
  * This is the model class for table "rating".
  *
  * @property int $performer_id
- * @property float|null $userRating
+ * @property float $userRating
  * @property int $failedTasks
  * @property int $finishedTasks
- *
- * @property Performer $performer
  */
 class Rating extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'rating';
     }
@@ -25,7 +23,7 @@ class Rating extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['performer_id'], 'required'],
@@ -39,7 +37,7 @@ class Rating extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'performer_id' => 'Performer ID',
@@ -54,8 +52,31 @@ class Rating extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getPerformer()
+    public function getPerformer(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Performer::class, ['performer_id' => 'performer_id']);
+    }
+
+    public function increaseFailedTasks(): void
+    {
+        $this->failedTasks += 1;
+        $this->save();
+    }
+
+    public function increaseFinishedTasks(): void
+    {
+        $this->finishedTasks += 1;
+        $this->save();
+    }
+
+    public function updatePerformerRating(): void
+    {
+        $totalMarks = Comments::find()->where(['performer_id' => $this->performer_id])->sum('mark');
+        $totalComments = Comments::find()->where(['performer_id' => $this->performer_id])->count();
+
+        $rating = $totalMarks / ($totalComments + $this->failedTasks);
+
+        $this->userRating = max($rating, 0);
+        $this->save();
     }
 }

@@ -9,15 +9,13 @@ namespace app\models;
  * @property string $name
  * @property float $lat
  * @property float $long
- *
- * @property User[] $users
  */
 class City extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'city';
     }
@@ -25,7 +23,7 @@ class City extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['name', 'lat', 'long'], 'required'],
@@ -37,7 +35,7 @@ class City extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => 'ID',
@@ -52,7 +50,7 @@ class City extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getUsers()
+    public function getUsers(): \yii\db\ActiveQuery
     {
         return $this->hasMany(User::class, ['city_id' => 'id']);
     }

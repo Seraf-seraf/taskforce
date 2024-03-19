@@ -3,6 +3,7 @@
 namespace app\models;
 
 use yii\db\ActiveRecord;
+use yii\web\UploadedFile;
 
 /**
  * This is the model class for table "file".
@@ -12,8 +13,6 @@ use yii\db\ActiveRecord;
  * @property string $name
  * @property string $path
  * @property int $size
- *
- * @property Task $task
  */
 class File extends ActiveRecord
 {
@@ -21,12 +20,12 @@ class File extends ActiveRecord
     /**
      * @var \yii\web\UploadedFile|null
      */
-    public $uploadedFile;
+    public UploadedFile|null $uploadedFile;
 
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'file';
     }
@@ -34,7 +33,7 @@ class File extends ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['uploadedFile'], 'file'],
@@ -47,7 +46,7 @@ class File extends ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id'       => 'ID',
@@ -64,12 +63,12 @@ class File extends ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getTask()
+    public function getTask(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Task::class, ['uid' => 'task_uid']);
     }
 
-    public function upload()
+    public function upload(): bool
     {
         $this->name = $this->uploadedFile->name;
         $this->path = '/uploads/' . uniqid() . '.' . $this->uploadedFile->getExtension();

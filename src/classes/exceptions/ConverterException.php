@@ -6,5 +6,5 @@ use Exception;
 
 class ConverterException extends Exception
 {
-    
+
 }

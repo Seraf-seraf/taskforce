@@ -7,16 +7,15 @@ namespace app\models;
  *
  * @property int $id
  * @property string $name
- *
- * @property Task[] $tasks
  */
 class TaskStatus extends \yii\db\ActiveRecord
 {
     const STATUS_NEW = 1;
+
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'taskStatus';
     }
@@ -24,7 +23,7 @@ class TaskStatus extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['name'], 'required'],
@@ -35,7 +34,7 @@ class TaskStatus extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => 'ID',
@@ -48,7 +47,7 @@ class TaskStatus extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getTasks()
+    public function getTasks(): \yii\db\ActiveQuery
     {
         return $this->hasMany(Task::class, ['task_status' => 'id']);
     }

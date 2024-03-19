@@ -1,4 +1,5 @@
 <?php
+
 namespace TaskForce\logic\actions;
 
 class DenyAction implements AbstractAction

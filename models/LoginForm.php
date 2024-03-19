@@ -7,11 +7,18 @@ use yii\base\Model;
 class LoginForm extends Model
 {
 
-    public $email;
+    public ?string $email;
 
-    public $password;
+    public ?string $password;
 
-    private $_user;
+    private ?User $_user;
+
+    public function __construct()
+    {
+        $this->email = null;
+        $this->password = null;
+        $this->_user = null;
+    }
 
     public function rules()
     {
@@ -25,16 +32,16 @@ class LoginForm extends Model
     public function attributeLabels()
     {
         return [
-            'email'    => 'E-mail',
+            'email' => 'E-mail',
             'password' => 'Пароль',
         ];
     }
 
     public function validatePassword($attribute)
     {
-        if ( ! $this->hasErrors()) {
+        if (!$this->hasErrors()) {
             $user = $this->getUser();
-            if ( ! $user || ! $user->validatePassword($this->password)) {
+            if (!$user || !$user->validatePassword($this->password)) {
                 $this->addError($attribute, 'Неправильный email или пароль');
             }
         }

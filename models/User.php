@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\base\Exception;
 use yii\base\NotSupportedException;
 use yii\web\IdentityInterface;
 
@@ -14,25 +15,32 @@ use yii\web\IdentityInterface;
  * @property string $email
  * @property string $password
  * @property int $city_id
- * @property int|null $isPerformer
- * @property string|null $dateRegistration
- *
- * @property City $city
- * @property Comments[] $comments
- * @property Performer[] $performers
- * @property Response[] $responses
- * @property Task[] $tasks
- * @property UserSettings[] $userSettings
+ * @property int $isPerformer
+ * @property string $dateRegistration
  */
 class User extends \yii\db\ActiveRecord implements IdentityInterface
 {
 
-    public $password_repeat;
+    public ?string $password_repeat;
+
+
+    public ?string $old_password;
+    public ?string $new_password;
+    public ?string $new_password_repeat;
+
+    public function __construct()
+    {
+        $this->password_repeat = null;
+        $this->old_password = null;
+        $this->new_password = null;
+        $this->new_password_repeat = null;
+    }
+
 
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'user';
     }
@@ -40,10 +48,10 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            [['name', 'email', 'password', 'city_id'], 'required'],
+            [['name', 'email', 'password', 'city_id'], 'required', 'on' => 'insert'],
             [['city_id', 'isPerformer'], 'integer'],
             [['dateRegistration'], 'safe'],
             [
@@ -52,8 +60,8 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
                 'message' => 'Пользователь с этой почтой уже зарегистрирован',
             ],
             [['name', 'email'], 'string', 'max' => 64],
-            ['email', 'email'],
-            [['password'], 'string', 'min' => 8, 'max' => 128],
+            [['email'], 'email'],
+            [['password'], 'string', 'min' => 8, 'max' => 64],
             [
                 'password_repeat',
                 'compare',
@@ -67,7 +75,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => 'ID',
@@ -77,7 +85,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
             'password_repeat'  => 'Повторите пароль',
             'city_id'          => 'Город',
             'isPerformer'      => 'Я собираюсь откликаться на заказы',
-            'dateRegistration' => 'Date Registration',
+            'dateRegistration' => 'Date Registration'
         ];
     }
 
@@ -86,7 +94,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getCity()
+    public function getCity(): \yii\db\ActiveQuery
     {
         return $this->hasOne(City::class, ['id' => 'city_id']);
     }
@@ -96,9 +104,9 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getComments()
+    public function getComments(): \yii\db\ActiveQuery
     {
-        return $this->hasMany(Comments::class, ['author_id' => 'id']);
+        return $this->hasOne(Comments::class, ['author_id' => 'id']);
     }
 
     /**
@@ -106,19 +114,9 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getRating()
+    public function getRating(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Rating::class, ['performer_id' => 'id']);
-    }
-
-    /**
-     * Gets query for [[Responses]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getResponses()
-    {
-        return $this->hasMany(Response::class, ['performer_id' => 'id']);
     }
 
     /**
@@ -126,7 +124,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getTasks()
+    public function getTasks(): \yii\db\ActiveQuery
     {
         return $this->hasMany(Task::class, ['client_id' => 'id']);
     }
@@ -136,7 +134,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getUserSettings()
+    public function getUserSettings(): \yii\db\ActiveQuery
     {
         return $this->hasOne(UserSettings::class, ['user_id' => 'id']);
     }
@@ -146,7 +144,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getPerformer()
+    public function getPerformer(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Performer::class, ['performer_id' => 'id']);
     }
@@ -176,7 +174,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
         return $totalMark / ($totalComments + $failedTasks);
     }
 
-    public function validatePassword($password)
+    public function validatePassword($password): bool
     {
         return Yii::$app->security->validatePassword(
             $password,
@@ -185,9 +183,17 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @throws Exception
+     */
+    public function setPassword($password): string
+    {
+        return Yii::$app->security->generatePasswordHash($password);
+    }
+
+    /**
      * {@inheritdoc}
      */
-    public static function findIdentity($id)
+    public static function findIdentity($id): User|IdentityInterface|null
     {
         return static::findOne(['id' => $id]);
     }
@@ -195,7 +201,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * {@inheritdoc}
      */
-    public static function findIdentityByAccessToken($token, $type = null)
+    public static function findIdentityByAccessToken($token, $type = null): ?IdentityInterface
     {
         throw new NotSupportedException('"findIdentityByAccessToken" is not implemented.');
     }
@@ -207,7 +213,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
      *
      * @return static|null
      */
-    public static function findByUsername($username)
+    public static function findByUsername(string $username): static|null
     {
         return static::findOne(['email' => $username]);
     }
@@ -223,7 +229,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * {@inheritdoc}
      */
-    public function getAuthKey()
+    public function getAuthKey(): ?string
     {
         return null;
     }
@@ -231,7 +237,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * {@inheritdoc}
      */
-    public function validateAuthKey($authKey)
+    public function validateAuthKey($authKey): ?bool
     {
         return true;
     }

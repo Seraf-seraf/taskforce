@@ -1,4 +1,5 @@
 <?php
+
 namespace TaskForce\converter;
 
 use DirectoryIterator;
@@ -21,11 +22,40 @@ class CvsFilesConverter
 
     protected function loadCsvFiles(string $directory): void
     {
-        foreach(new DirectoryIterator($directory) as $file) {
+        foreach (new DirectoryIterator($directory) as $file) {
             if ($file->getExtension() === 'csv') {
                 $this->filesToConvert[] = $file->getFileInfo();
             }
         }
+    }
+
+    public function convertFiles(string $outputDirectory): array
+    {
+        $result = [];
+
+        foreach ($this->filesToConvert as $file) {
+            $result[] = $this->convertFile($file, $outputDirectory);
+        }
+
+        return $result;
+    }
+
+    protected function convertFile(SplFileInfo $file, string $outputDirectory): string
+    {
+        $fileObject = new SplFileObject($file->getRealPath());
+        $fileObject->setFlags(SplFileObject::READ_CSV);
+
+        $columns = $fileObject->fgetcsv();
+        $values = [];
+
+        while (!$fileObject->eof()) {
+            $values[] = $fileObject->fgetcsv();
+        }
+
+        $tableName = $fileObject->getBasename('.csv');
+        $sqlContent = $this->getSqlContent($tableName, $columns, $values);
+
+        return $this->saveSqlContent($tableName, $outputDirectory, $sqlContent);
     }
 
     protected function getSqlContent(string $tableName, array $columns, array $values): string
@@ -34,7 +64,7 @@ class CvsFilesConverter
         $sql = "INSERT INTO $tableName($columnsString) VALUES ";
 
         foreach ($values as $row) {
-            array_walk($row, function(&$value) {
+            array_walk($row, function (&$value) {
                 $value = addslashes($value);
                 $value = "'$value'";
             });
@@ -56,34 +86,5 @@ class CvsFilesConverter
         file_put_contents($filename, $content);
 
         return $filename;
-    }
-
-    protected function convertFile(SplFileInfo $file, string $outputDirectory): string
-    {
-        $fileObject = new SplFileObject($file->getRealPath());
-        $fileObject->setFlags(SplFileObject::READ_CSV);
-
-        $columns = $fileObject->fgetcsv();
-        $values = [];
-
-        while (!$fileObject->eof()) {
-            $values[] = $fileObject->fgetcsv();
-        }
-
-        $tableName = $fileObject->getBasename('.csv');
-        $sqlContent = $this->getSqlContent($tableName, $columns, $values);
-
-        return $this->saveSqlContent($tableName, $outputDirectory, $sqlContent);
-    }
-
-    public function convertFiles(string $outputDirectory): array
-    {
-        $result = [];
-
-        foreach ($this->filesToConvert as $file) {
-            $result[] = $this->convertFile($file, $outputDirectory);
-        }
-
-        return $result;
     }
 }

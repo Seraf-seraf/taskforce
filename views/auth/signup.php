@@ -1,5 +1,5 @@
 <?php
-/** @var \app\controllers\AuthController $model */
+/** @var \app\controllers\AuthController $user */
 
 /** @var \app\controllers\AuthController $cities */
 
@@ -15,26 +15,33 @@ $this->title = 'Регистрация';
             <?php
             $form = ActiveForm::begin(['enableAjaxValidation' => true]); ?>
             <h3 class="head-main head-task">Регистрация нового пользователя</h3>
-            <?= $form->field($model, 'name')->textInput(
+            <?= $form->field($user, 'name')->textInput(
                 ['autocomplete' => 'off']
             ); ?>
             <div class="half-wrapper">
-                <?= $form->field($model, 'email')->textInput(
+                <?= $form->field($user, 'email')->textInput(
                     ['autocomplete' => 'off']
                 ); ?>
-                <?= $form->field($model, 'city_id')->dropDownList(
+                <?= $form->field($user, 'city_id')->dropDownList(
                     array_column($cities, 'name', 'id')
                 );
                 ?>
             </div>
             <div class="half-wrapper">
-                <?= $form->field($model, 'password')->passwordInput(); ?>
+                <?= $form->field($user, 'password')->passwordInput(); ?>
             </div>
             <div class="half-wrapper">
-                <?= $form->field($model, 'password_repeat')->passwordInput(); ?>
+                <?= $form->field($user, 'password_repeat')->passwordInput(); ?>
             </div>
             <div class="half-wrapper">
-                <?= $form->field($model, 'isPerformer')->checkbox(); ?>
+                <?= $form->field($user, 'isPerformer')->checkbox(); ?>
+            </div>
+            <h4>Создать аккаунт с помощью: </h4>
+            <div class="half-wrapper">
+                <?= yii\authclient\widgets\AuthChoice::widget([
+                    'baseAuthUrl' => ['auth/auth'],
+                    'popupMode' => false,
+                ]); ?>
             </div>
             <?= Html::submitInput(
                 'Создать аккаунт',

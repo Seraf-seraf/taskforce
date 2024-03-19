@@ -18,6 +18,7 @@ $config = [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'OaLBHkf_6klwLJvSCY8zYrtQAuia-wFX',
+            'baseUrl' => ''
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -40,6 +41,20 @@ $config = [
             // send all mails to a file by default.
             'useFileTransport' => true,
         ],
+        'authManager' => [
+            'class' => 'yii\rbac\PhpManager',
+        ],
+        'authClientCollection' => [
+            'class' => 'yii\authclient\Collection',
+            'clients' => [
+                'vkontakte' => [
+                    'class' => 'yii\authclient\clients\VKontakte',
+                    'clientId' => '51872751',
+                    'clientSecret' => 'EvvO07T86OBGZ5ZBlygY',
+                    'scope' => 'email'
+                ],
+            ],
+        ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [
@@ -61,7 +76,9 @@ $config = [
                 '/' => 'tasks/index',
                 'view/<id:\d+>'   => 'tasks/view',
                 'user/<id:\d+>'   => 'user/view',
-                'error' => 'error/notfound'
+                'error' => 'error/notfound',
+                'my/<tag:\w+>' => 'tasks/my',
+                'my' => 'tasks/my'
             ],
         ],
     ],

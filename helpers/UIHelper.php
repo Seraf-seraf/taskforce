@@ -37,22 +37,30 @@ class UIHelper
     /**
      * Создание контейнера со звездочками рейтинга
      *
-     * @param  float  $rating
      * @param  string  $size  small or big
+     * @param float|null $rating
      *
      * @return string
      */
     public static function getStarsByRate(
-        float $rating,
-        string $size = 'small'
+        string $size = 'small',
+        float $rating = 0,
+        bool $active = false
     ): string {
         $stars = "<div class='stars-rating $size'>";
 
-        for ($i = 0; $i < 5; $i++) {
-            if ($i < $rating) {
-                $stars .= "<span class='fill-star'></span>";
-            } else {
-                $stars .= '<span></span>';
+        if ($active) {
+            $stars = "<div class='stars-rating $size active-stars'>";
+            for ($i = 1; $i < 6; $i++) {
+                $stars .= "<span type='radio' id='star' data-star='$i'></span>";
+            }
+        } else {
+            for ($i = 0; $i < 5; $i++) {
+                if ($i < $rating) {
+                    $stars .= "<span class='fill-star'></span>";
+                } else {
+                    $stars .= '<span></span>';
+                }
             }
         }
 
@@ -99,13 +107,13 @@ class UIHelper
                 ];
 
                 if ($action == CancelAction::class) {
-                    $options += ['href' => Url::toRoute(['tasks/cancel'])];
+                    $options += ['href' => Url::toRoute(['tasks/cancel', 'id' => $task->id])];
                 }
 
                 $buttons[] = Html::tag('a', $label, $options);
             }
         } catch (StatusActionException $exception) {
-            error($exception->getMessage());
+            error_log($exception->getMessage());
         }
 
         return $buttons;

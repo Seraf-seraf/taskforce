@@ -35,20 +35,24 @@ $this->beginBody(); ?>
             <?php
             $links = [
                 ['label' => 'Новое', 'url' => ['tasks/index']],
-                ['label' => 'Мои задания', 'url' => ['tasks/my']],
-                ['label' => 'Создать задание', 'url'   => ['tasks/create']],
-                ['label' => 'Настройки', 'url' => ['user/settings']]
+                [
+                    'label' => 'Мои задания',
+                    'url' => ['tasks/my'],
+                    'active' => Yii::$app->controller->route === 'tasks/my'
+                ],
+                [
+                    'label' => 'Создать задание',
+                    'url' => ['tasks/create'],
+                    'visible' => isset(Yii::$app->user->identity->isPerformer) ? !Yii::$app->user->identity->isPerformer : false
+                ],
+                [
+                    'label' => 'Настройки',
+                    'url' => ['settings/index'],
+                    'active' => Yii::$app->controller->id === 'settings'
+                ]
             ];
 
-            if (Yii::$app->user->identity->isPerformer ?? 0) {
-                $links = [
-                    ['label' => 'Новое', 'url' => ['tasks/index']],
-                    ['label' => 'Мои задания', 'url' => ['tasks/my']],
-                    ['label' => 'Настройки', 'url' => ['user/settings']]
-                ];
-            }
-
-            if (Yii::$app->controller->id !== 'auth'): ?>
+            if (!Yii::$app->user->isGuest): ?>
                 <?= Menu::widget([
                     'options'        => ['class' => 'nav-list'],
                     'itemOptions'    => ['class' => 'list-item'],
@@ -63,30 +67,47 @@ $this->beginBody(); ?>
     if (Yii::$app->controller->id !== 'auth'): ?>
         <?php if ($user = Yii::$app->user->identity): ?>
             <div class="user-block">
-                <a href="<?= Url::toRoute([
-                    'user/view', 'id' => $user->id,
-                ]); ?>">
-                    <img class="user-photo"
-                         src="<?= $user->userSettings->avatar; ?>" width="55"
-                         height="55"
-                         alt="Аватар">
-                </a>
+                <?= Html::a(
+                    Html::img(
+                        $user->userSettings->avatar,
+                        [
+                            'class' => "user-photo",
+                            'width' => "55",
+                            'height' => "55",
+                            'alt' => "Аватар"
+                        ]
+                    ),
+                    Url::toRoute(
+                        [
+                            'user/view',
+                            'id' => $user->id
+                        ]
+                    ),
+                    [
+                        'class' => 'header__account-registration'
+                    ]
+                );
+                ?>
                 <div class="user-menu">
-                    <p class="user-name"><?= $user->name; ?></p>
+                    <p class="user-name"><?= Html::encode($user->name); ?></p>
                     <div class="popup-head">
-                        <ul class="popup-menu">
-                            <li class="menu-item">
-                                <a href="<?= Url::toRoute('user/settings'); ?>"
-                                   class="link">Настройки</a>
-                            </li>
-                            <li class="menu-item">
-                                <a href="#" class="link">Связаться с нами</a>
-                            </li>
-                            <li class="menu-item">
-                                <a href="<?= Url::toRoute('auth/logout'); ?>"
-                                   class="link">Выход из системы</a>
-                            </li>
-                        </ul>
+                        <?php
+                        $items = [
+                            ['label' => 'Настройки', 'url' => Url::toRoute('settings/index')],
+                            ['label' => 'Выход из системы', 'url' => Url::toRoute('auth/logout')]
+                        ];
+                        ?>
+
+                        <?= Html::ul($items, [
+                            'class' => 'popup-menu',
+                            'item' => function ($item, $index) {
+                                return Html::tag(
+                                    'li',
+                                    Html::a($item['label'], $item['url'], ['class' => 'link']),
+                                    ['class' => 'menu-item']
+                                );
+                            }
+                        ]) ?>
                     </div>
                 </div>
             </div>

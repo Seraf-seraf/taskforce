@@ -1,2 +1,12 @@
+Options +FollowSymLinks
+IndexIgnore */*
 RewriteEngine on
-RewriteRule ^(.+)?$ /web/$1
+
+# Перенаправление всех запросов через папку /web
+RewriteCond %{REQUEST_URI} !^/(web)
+RewriteRule ^(.*)$ /web/$1 [L]
+
+# Проверка наличия файла или каталога, если не существует, перенаправляем на /web/index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ /web/index.php [L]
