@@ -75,7 +75,7 @@ $this->title = 'Новые задания';
        <div class="right-card black">
            <div class="search-form">
                <?php
-               $form = ActiveForm::begin(['action' => ['tasks/index']]); ?>
+               $form = ActiveForm::begin(); ?>
                     <h4 class="head-card">Категории</h4>
                     <div class="checkbox-wrapper">
                         <?= Html::activeCheckboxList($task, 'category_id', array_column($categories, 'name', 'id'),

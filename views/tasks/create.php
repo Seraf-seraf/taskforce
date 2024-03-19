@@ -15,7 +15,6 @@ $this->title = 'Создать задание';
 <main class="main-content main-content--center container">
     <div class="add-task-form regular-form">
         <?php $form = ActiveForm::begin([
-            'action' => Url::toRoute(['tasks/create']),
             'options' => ['enctype' => 'multipart/form-data'],
         ]); ?>
             <h3 class="head-main head-main">Публикация нового задания</h3>
