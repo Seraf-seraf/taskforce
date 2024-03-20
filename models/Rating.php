@@ -69,7 +69,7 @@ class Rating extends \yii\db\ActiveRecord
         $this->save();
     }
 
-    public function updatePerformerRating(): void
+    public function getPerformerRating(): void
     {
         $totalMarks = Comments::find()->where(['performer_id' => $this->performer_id])->sum('mark');
         $totalComments = Comments::find()->where(['performer_id' => $this->performer_id])->count();
