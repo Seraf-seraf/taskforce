@@ -19,5 +19,5 @@
 - Yii2 Framework
 - ООП в PHP
 - ORM
-- Dropzone
-- YandexMap
+- Библиотеки: Dropzone, YandexMap, Authclient
+- OAuth2: VK API
