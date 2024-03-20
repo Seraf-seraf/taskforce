@@ -149,31 +149,6 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->hasOne(Performer::class, ['performer_id' => 'id']);
     }
 
-    /**
-     * Расчет рейтинга пользователя
-     *
-     * @param  int  $id
-     *
-     * @return float
-     */
-    public static function calculateRating(int $id): float
-    {
-        $totalMark = Comments::find()
-                             ->where(['performer_id' => $id])
-                             ->sum('mark');
-
-        $totalComments = Comments::find()
-                                 ->where(['performer_id' => $id])
-                                 ->count();
-
-        $failedTasks = Rating::find()
-                             ->select('failedTasks')
-                             ->where(['performer_id' => $id])
-                             ->scalar();
-
-        return $totalMark / ($totalComments + $failedTasks);
-    }
-
     public function validatePassword($password): bool
     {
         return Yii::$app->security->validatePassword(
