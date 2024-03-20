@@ -79,4 +79,21 @@ class Rating extends \yii\db\ActiveRecord
         $this->userRating = max($rating, 0);
         $this->save();
     }
+
+    public static function getRatingPosition(int $id): int
+    {
+        return (new Query())
+            ->select(['COUNT(performer_id) + 1'])
+            ->from('rating')
+            ->where([
+                '>',
+                'rating.userRating',
+                (new Query())
+                    ->select('userRating')
+                    ->from('rating')
+                    ->where(['performer_id' => $id]),
+            ])
+            ->orderBy(['userRating' => 'DESC'])
+            ->scalar();
+    }
 }
