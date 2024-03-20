@@ -94,22 +94,4 @@ class Performer extends \yii\db\ActiveRecord
     {
         return $this->hasMany(Comments::class, ['performer_id' => 'performer_id']);
     }
-
-
-    public static function getRatingPosition(int $id): int
-    {
-        return (new Query())
-            ->select(['COUNT(performer_id) + 1'])
-            ->from('rating')
-            ->where([
-                '>',
-                'rating.userRating',
-                (new Query())
-                    ->select('userRating')
-                    ->from('rating')
-                    ->where(['performer_id' => $id]),
-            ])
-            ->orderBy(['userRating' => 'DESC'])
-            ->scalar();
-    }
 }
