@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\models\Comments;
 use app\models\Performer;
 use app\models\Response;
+use app\models\Rating;
 use app\models\Task;
 use app\models\TaskCategories;
 use app\models\User;
@@ -50,7 +51,7 @@ class UserController extends SecuredController
                 ->count('name');
         }
 
-        $ratingPosition = Performer::getRatingPosition($id);
+        $ratingPosition = Rating::getRatingPosition($id);
 
         return $this->render('view', [
             'user'      => $user,
