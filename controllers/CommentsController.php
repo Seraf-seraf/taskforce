@@ -58,7 +58,7 @@ class CommentsController extends SecuredController
             $task->goToNextStatus(new CompleteAction());
 
             $rating->increaseFinishedTasks();
-            $rating->updatePerformerRating();
+            $rating->getPerformerRating();
         }
 
         return $this->redirect(['tasks/view', 'id' => $id]);
