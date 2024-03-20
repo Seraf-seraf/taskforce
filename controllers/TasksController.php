@@ -174,7 +174,7 @@ class TasksController extends SecuredController
 
         $task->goToNextStatus(new DenyAction());
         $rating->increaseFailedTasks();
-        $rating->updatePerformerRating();
+        $rating->getPerformerRating();
 
         $performer->status_id = PerformerStatus::PERFORMER_FREE;
         $performer->save();
