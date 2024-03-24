@@ -24,7 +24,7 @@ class UploadController extends Controller
         $files_directory = FileHelper::findFiles('web/uploads/');
 
         foreach ($files_directory as $path) {
-            $path = substr(FileHelper::normalizePath($path, '/'), 3);
+            $path = substr(FileHelper::normalizePath($path, '/'), 3); // в бд записаны пути без папки web
             if (!in_array($path, $all_files)) {
                 FileHelper::unlink('web' . $path);
                 $this->stdout("Файл web$path удален" . PHP_EOL);
